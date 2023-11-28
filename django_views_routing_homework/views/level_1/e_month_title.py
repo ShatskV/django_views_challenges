@@ -1,5 +1,5 @@
 from django.http import HttpResponse, HttpResponseNotFound
-
+from typing import Union
 
 """
 Вьюха get_month_title_view возвращает название месяца по его номеру. 
@@ -13,10 +13,18 @@ from django.http import HttpResponse, HttpResponseNotFound
 """
 
 
-def get_month_title_by_number(month_number: int):
-    pass  # код писать тут
+
+def get_month_title_by_number(month_number: int) -> Union[str , None]:
+    months_names = ['январь', 'февраль', 'март', 'апрель', 'май', 'июнь', 'июль', 'август', 'сентябрь',
+          'октябрь', 'ноябрь', 'декабрь']
+    amount = len(months_names)
+    if month_number < 1 or month_number > amount:
+        return None
+    return months_names[month_number - 1]
 
 
 def get_month_title_view(request, month_number: int):
-    # код писать тут
-    return HttpResponseNotFound('Месяца с таким номером не существует')
+    month_name = get_month_title_by_number(month_number)
+    if not month_name:
+        return HttpResponseNotFound('Месяца с таким номером не существует')
+    return HttpResponse(month_name)
