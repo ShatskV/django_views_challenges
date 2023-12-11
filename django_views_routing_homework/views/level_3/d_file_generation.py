@@ -14,8 +14,32 @@
 скачивать сгенерированный файл.
 """
 
-from django.http import HttpResponse, HttpRequest
+from random import choice
+from string import ascii_letters, digits
+
+from django.http import HttpRequest, HttpResponse, HttpResponseForbidden, HttpResponseBadRequest
+
+MAX_LENGTH = 3000
+
+
+def generate_text(length):
+    text = (''.join(choice(ascii_letters + digits + ' \n') for _ in range(length)))
+    return text
 
 
 def generate_file_with_text_view(request: HttpRequest) -> HttpResponse:
-    pass  # код писать тут
+    if request.method == 'GET':
+        print(request.GET.get('length'))
+        length = request.GET.get('length')
+        try:
+            length = int(length) if length is not None else None
+        except ValueError:
+            return HttpResponseForbidden()
+        if length is None or length < 1 or length > MAX_LENGTH:
+            return HttpResponseForbidden()
+        text = generate_text(length)
+        response = HttpResponse(content_type='text/plain')
+        response['Content-Disposition'] = 'attachment; filename=text.txt'
+        response.write(text)
+        return response
+    return HttpResponseBadRequest('Use METHOD GET!')
