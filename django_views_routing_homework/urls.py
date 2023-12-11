@@ -12,6 +12,7 @@ from django_views_routing_homework.views.level_2.d_authorization import authoriz
 from django_views_routing_homework.views.level_3.b_validate_user_data import validate_user_data_view
 from django_views_routing_homework.views.level_3.c_github_full_name import fetch_name_from_github_view
 from django_views_routing_homework.views.level_3.d_file_generation import generate_file_with_text_view
+from django_views_routing_homework.views.level_2.b_greet_user_language import greet_user_in_different_languages_view
 
 from django_views_routing_homework.views.level_3.a_user_ip import show_user_ip_view
 
@@ -22,7 +23,8 @@ urlpatterns = [
     path('banned/<slug:username>/', is_username_banned_view),
     path('user-info/<int:user_id>/', get_user_info_view),
     path('month-title/<int:month_number>/', get_month_title_view),
-    path('user-info-by-username/<int:username>/', get_user_info_by_username_view),
+    path('user-info-by-username/<str:username>/', get_user_info_by_username_view),
+    path('greet/<str:name>/<str:language>/', greet_user_in_different_languages_view),
     path('products/', get_products_view),
     path('authorization/', authorization_view),
     path('process-authorization/', process_authorization_view),
