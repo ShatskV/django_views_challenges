@@ -13,14 +13,15 @@ from typing import Union
 """
 
 
+MONTH_NAMES = ['январь', 'февраль', 'март', 'апрель', 'май', 'июнь', 'июль', 'август', 'сентябрь',
+               'октябрь', 'ноябрь', 'декабрь']
 
-def get_month_title_by_number(month_number: int) -> Union[str , None]:
-    months_names = ['январь', 'февраль', 'март', 'апрель', 'май', 'июнь', 'июль', 'август', 'сентябрь',
-          'октябрь', 'ноябрь', 'декабрь']
-    amount = len(months_names)
+
+def get_month_title_by_number(month_number: int) -> str | None:
+    amount = len(MONTH_NAMES)
     if month_number < 1 or month_number > amount:
         return None
-    return months_names[month_number - 1]
+    return MONTH_NAMES[month_number - 1]
 
 
 def get_month_title_view(request, month_number: int):
