@@ -17,9 +17,56 @@
 Для тестирования рекомендую использовать Postman.
 Когда будете писать код, не забывайте о читаемости, поддерживаемости и модульности.
 """
+import json
 
-from django.http import HttpResponse, HttpRequest
+from django.http import HttpRequest, HttpResponse, HttpResponseBadRequest
+
+VALID_REGISTERED_FROM = ['website', 'mobile_app']
+
+
+def check_full_name(full_name: str) -> bool:
+    name_length = len(full_name)
+    if name_length < 5 or name_length > 256:
+        return False
+    return True
+
+
+def check_email(email: str) -> bool:
+    if '@' in email and '.' in email:
+        return True
+    return False
+
+
+def check_registered_from(device: str) -> bool:
+    if device in VALID_REGISTERED_FROM:
+        return True
+    return False
+
+
+def check_age(age: str | int) -> bool:
+    try:
+        age = int(age)
+    except ValueError:
+        return False
+    if age < 1 or age > 160:
+        return False
+    return True
 
 
 def validate_user_data_view(request: HttpRequest) -> HttpResponse:
-    pass  # код писать тут
+    if request.method == 'POST':
+        data = json.loads(request.body)
+        name = data.pop('full_name', None)
+        email = data.pop('email', None)
+        device = data.pop('registered_from', None)
+        age = data.pop('age', None)
+        if data:
+            return HttpResponseBadRequest('There are extra fields!')
+        if not all([name, email, device]):
+            return HttpResponseBadRequest('There are not all required fields!')
+        if not all([check_full_name(name), check_email(email), check_registered_from(device), 
+                    check_age(age) if age else 1]):
+            return HttpResponse('{"is_valid": false}')
+        else:
+            return HttpResponse('{"is_valid": true}')
+    return HttpResponseBadRequest('Use METHOD POST!')
