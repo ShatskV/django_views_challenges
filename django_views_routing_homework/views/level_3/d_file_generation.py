@@ -16,10 +16,10 @@
 
 from random import choice
 from string import ascii_letters, digits
-
+from django.forms import ValidationError
 from django.http import HttpRequest, HttpResponse, HttpResponseForbidden, HttpResponseBadRequest
 
-MAX_LENGTH = 3000
+MAX_LENGTH = 1000
 
 
 def generate_text(length):
@@ -27,17 +27,28 @@ def generate_text(length):
     return text
 
 
+def validate_length(length):
+    try:
+        length = int(length) if length is not None else None
+    except ValueError:
+        raise ValidationError('Field "length" is not number!')
+    except TypeError:
+        raise ValidationError('Field "length" is missed!')
+    if length < 1 or length > MAX_LENGTH:
+        raise ValidationError(f'Field "length" should be >= 1 and <= {MAX_LENGTH}!')
+
+
 def generate_file_with_text_view(request: HttpRequest) -> HttpResponse:
     if request.method == 'GET':
-        print(request.GET.get('length'))
         length = request.GET.get('length')
+
         try:
-            length = int(length) if length is not None else None
-        except ValueError:
-            return HttpResponseForbidden()
-        if length is None or length < 1 or length > MAX_LENGTH:
-            return HttpResponseForbidden()
-        text = generate_text(length)
+            validate_length(length)
+        except ValidationError as e:
+            return HttpResponseForbidden(e)
+        
+        
+        text = generate_text(int(length))
         response = HttpResponse(content_type='text/plain')
         response['Content-Disposition'] = 'attachment; filename=text.txt'
         response.write(text)

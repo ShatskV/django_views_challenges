@@ -10,19 +10,23 @@
 """
 
 import requests
-from django.http import HttpRequest, HttpResponse, HttpResponseBadRequest, HttpResponseNotFound
+from django.http import HttpRequest, JsonResponse
 
 
-def fetch_name_from_github_view(request: HttpRequest, github_username: str) -> HttpResponse:
+def fetch_name_from_github_view(request: HttpRequest, github_username: str) -> JsonResponse:
     url = f'https://api.github.com/users/{github_username}'
     try:
         response = requests.get(url)
-        response.raise_for_status()
     except requests.ConnectionError as e:
-        return HttpResponseBadRequest('Github connection error')
+        return JsonResponse({'error': 'github connection error'}, status=502)
+    
+    if response.status_code == 404:
+            return JsonResponse({'error': 'username not found'}, status=404)
+    
+    try:
+        response.raise_for_status()
     except requests.HTTPError as e:
-        if response.status_code == 404:
-            return HttpResponseNotFound('')
-        return HttpResponseBadRequest(f'HTTP error: {e}')
+        return JsonResponse({'error': f'HTTP error: {e}'}, status=response.status_code)
+    
     answer = response.json()
-    return HttpResponse(f'{{"name": {str(answer.get("name"))}}}')   
+    return JsonResponse({"name": answer.get("name")})
